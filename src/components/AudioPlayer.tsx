@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
+import ReactPlayer from 'react-player';
 import './AudioPlayer.css';
 
 interface AudioPlayerProps {
@@ -7,36 +8,34 @@ interface AudioPlayerProps {
 }
 
 const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, onClose }) => {
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.load();
-    }
-  }, [audioUrl]);
-
   return (
     <div className="audio-player-overlay">
       <div className="audio-player-container">
         <div className="player-header">
-          <h4>🎵 Now Playing</h4>
+          <h4>🎵 Now Playing - PKRK FM</h4>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
         
         <div className="player-controls">
-          <audio 
-            ref={audioRef}
-            controls 
-            autoPlay
-            className="audio-element"
-          >
-            <source src={audioUrl} type="audio/mpeg" />
-            Your browser does not support the audio element.
-          </audio>
+          <ReactPlayer
+            url={audioUrl}
+            controls
+            playing
+            width="100%"
+            height="60px"
+            config={{
+              file: {
+                attributes: {
+                  controlsList: 'nodownload'
+                }
+              }
+            }}
+          />
         </div>
         
         <div className="audio-info">
-          <p className="audio-url">Playing from CloudFront CDN</p>
+          <p className="audio-url">🌐 Streaming from CloudFront CDN</p>
+          <p className="audio-source">📍 Mumbai, India Region</p>
         </div>
       </div>
     </div>
