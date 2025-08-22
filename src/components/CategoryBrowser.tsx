@@ -20,11 +20,13 @@ interface Show {
 
 interface CategoryBrowserProps {
   categories: Category[];
+  onCategorySelect: (category: Category) => void;  // ← ADD THIS BACK
   onPlayAudio: (audioPath: string) => void;
 }
 
-const CategoryBrowser: React.FC<CategoryBrowserProps> = ({
-  categories,
+const CategoryBrowser: React.FC<CategoryBrowserProps> = ({ 
+  categories, 
+  onCategorySelect,  // ← INCLUDE THIS
   onPlayAudio
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
