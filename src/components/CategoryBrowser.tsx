@@ -50,24 +50,18 @@ const CategoryBrowser: React.FC<CategoryBrowserProps> = ({
 
   // Handler for Browse Content
   const handleBrowseContent = async (category: Category) => {
-    setSelectedCategory(category);
-    setShows([]);
-    setLoadingShows(true);
+  try {
+    const response = await fetch(
+      `https://fz7forxwz8.execute-api.ap-south-1.amazonaws.com/prod/categories/shows`
+    );
+    const shows = await response.json();
+    console.log('Shows for', category.display_name, shows);
+    // Display shows in modal or navigate to shows page
+  } catch (error) {
+    console.error('Error fetching shows:', error);
+  }
+};
 
-    // Example fetch shows API call - update API endpoint as per your backend
-    try {
-      const response = await fetch(
-        `https://fz7forxwz8.execute-api.ap-south-1.amazonaws.com/prod/categories/${category.category_id}/shows`
-      );
-      if (!response.ok) throw new Error('Failed to load shows');
-      const data: Show[] = await response.json();
-      setShows(data);
-    } catch (error) {
-      // Fallback: show basic info or error
-      setShows([]);
-    }
-    setLoadingShows(false);
-  };
 
   return (
     <div className="category-browser">
