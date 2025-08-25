@@ -32,19 +32,33 @@ function App({ signOut, user }: any) {
 
   const fetchCategories = async () => {
     try {
+      console.log('📡 Fetching categories...');
       const response = await axios.get(
         'https://fz7forxwz8.execute-api.ap-south-1.amazonaws.com/prod/categories'
       );
+      console.log('📊 Categories response:', response.data);
       setCategories(response.data);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('❌ Error fetching categories:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const playAudio = (audioPath: string) => {
-    setCurrentAudio(`https://d1jespy3mv91ys.cloudfront.net/${audioPath}`);
+    // Properly encode URL for special characters like spaces
+    const encodedPath = audioPath
+      .split('/')
+      .map(segment => encodeURIComponent(segment))
+      .join('/');
+    
+    const fullURL = `https://d1jespy3mv91ys.cloudfront.net/${encodedPath}`;
+    
+    console.log('🎵 Original path:', audioPath);
+    console.log('🎵 Encoded path:', encodedPath);
+    console.log('🎵 Full URL:', fullURL);
+    
+    setCurrentAudio(fullURL);
   };
 
   return (

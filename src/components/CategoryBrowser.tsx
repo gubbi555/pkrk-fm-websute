@@ -15,18 +15,18 @@ interface Show {
   show_id: string;
   title: string;
   description: string;
-  episodes?: string[];
+  episodes?: { title: string; audio_path: string }[];
 }
 
 interface CategoryBrowserProps {
   categories: Category[];
-  onCategorySelect: (category: Category) => void;  // ← ADD THIS BACK
+  onCategorySelect: (category: Category) => void;
   onPlayAudio: (audioPath: string) => void;
 }
 
 const CategoryBrowser: React.FC<CategoryBrowserProps> = ({ 
   categories, 
-  onCategorySelect,  // ← INCLUDE THIS
+  onCategorySelect,
   onPlayAudio
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -34,34 +34,67 @@ const CategoryBrowser: React.FC<CategoryBrowserProps> = ({
   const [loadingShows, setLoadingShows] = useState(false);
 
   const getSampleAudio = (category: Category) => {
+    let audioPath = '';
     switch (category.category_id) {
       case 'film-songs':
-        return 'film-songs/hit-kannada-songs-vol1/MonsoonRaga/Hombisilina (PenduJatt.Com.Se).mp3';
+        audioPath = 'film-songs/hit-kannada-songs-vol1/MonsoonRaga/Hombisilina (PenduJatt.Com.Se).mp3';
+        break;
       case 'podcasts':
-        return 'podcasts/season1/episode1.mp3';
+        audioPath = 'podcasts/season1/episode1.mp3';
+        break;
       case 'stories':
-        return 'stories/horror/BhootadaMane1/season1/episode1.mp3';
+        audioPath = 'stories/horror/BhootadaMane1/season1/episode1.mp3';
+        break;
       case 'web-series':
-        return 'web-series/jackie1/season1/episode1.mp3';
+        audioPath = 'web-series/jackie1/season1/episode1.mp3';
+        break;
       default:
-        return '';
+        audioPath = '';
     }
+    
+    // Log the exact URL being constructed
+    const fullURL = `https://d1jespy3mv91ys.cloudfront.net/${audioPath}`;
+    console.log('🎵 Sample Audio URL:', fullURL);
+    console.log('🎵 Audio Path:', audioPath);
+    
+    return audioPath;
   };
 
   // Handler for Browse Content
   const handleBrowseContent = async (category: Category) => {
-  try {
-    const response = await fetch(
-      `https://fz7forxwz8.execute-api.ap-south-1.amazonaws.com/prod/categories/shows`
-    );
-    const shows = await response.json();
-    console.log('Shows for', category.display_name, shows);
-    // Display shows in modal or navigate to shows page
-  } catch (error) {
-    console.error('Error fetching shows:', error);
-  }
-};
+    setSelectedCategory(category);
+    setShows([]);
+    setLoadingShows(true);
 
+    try {
+      console.log('🔍 Fetching shows for category:', category.category_id);
+      
+      const response = await fetch(
+        `https://fz7forxwz8.execute-api.ap-south-1.amazonaws.com/prod/categories/shows`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const showsData = await response.json();
+      console.log('📚 Shows response:', showsData);
+      console.log('📚 Shows for', category.display_name, showsData);
+      
+      setShows(showsData);
+    } catch (error) {
+      console.error('❌ Error fetching shows:', error);
+      setShows([]);
+    } finally {
+      setLoadingShows(false);
+    }
+  };
+
+  // Handler for playing episode audio
+  const handlePlayEpisode = (audioPath: string) => {
+    console.log('🎵 Playing episode:', audioPath);
+    onPlayAudio(audioPath);
+  };
 
   return (
     <div className="category-browser">
@@ -106,26 +139,54 @@ const CategoryBrowser: React.FC<CategoryBrowserProps> = ({
         ))}
       </div>
 
-      {/* Minimal show list modal/section */}
+      {/* Enhanced show list modal */}
       {selectedCategory && (
         <div className="browse-modal">
-          <h2>
-            {selectedCategory.display_name} Shows
-            <button onClick={() => setSelectedCategory(null)}>Close</button>
-          </h2>
-          {loadingShows && <p>Loading shows...</p>}
-          <ul>
-            {shows.length > 0 ? (
-              shows.map((show) => (
-                <li key={show.show_id}>
-                  <strong>{show.title}</strong> <br />
-                  {show.description}
-                </li>
-              ))
-            ) : (
-              !loadingShows && <p>No shows available.</p>
-            )}
-          </ul>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>{selectedCategory.display_name} Shows</h2>
+              <button 
+                className="close-modal-btn"
+                onClick={() => setSelectedCategory(null)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              {loadingShows && <p className="loading-text">Loading shows...</p>}
+              
+              {shows.length > 0 ? (
+                <div className="shows-list">
+                  {shows.map((show) => (
+                    <div key={show.show_id} className="show-item">
+                      <h4>{show.title}</h4>
+                      <p>{show.description}</p>
+                      
+                      {show.episodes && show.episodes.length > 0 && (
+                        <div className="episodes-list">
+                          <h5>Episodes:</h5>
+                          {show.episodes.map((episode, index) => (
+                            <div key={index} className="episode-item">
+                              <span>{episode.title}</span>
+                              <button 
+                                className="play-episode-btn"
+                                onClick={() => handlePlayEpisode(episode.audio_path)}
+                              >
+                                🎵 Play
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                !loadingShows && <p className="no-shows">No shows available for this category.</p>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
