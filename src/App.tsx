@@ -34,24 +34,61 @@ function App({ signOut, user }: any) {
 
   const fetchCategories = async () => {
     try {
+      console.log('📡 Fetching categories from API...');
       const response = await axios.get(
         'https://fz7forxwz8.execute-api.ap-south-1.amazonaws.com/prod/categories'
       );
+      console.log('📊 Categories response:', response.data);
       setCategories(response.data);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('❌ Error fetching categories:', error);
+      // Only use fallback if API completely fails
+      setCategories(getDefaultCategories());
     } finally {
       setLoading(false);
     }
   };
 
+  const getDefaultCategories = (): Category[] => [
+    {
+      category_id: 'film-songs',
+      display_name: 'ಚಲನಚಿತ್ರ ಗೀತೆಗಳು',
+      description: 'Popular Kannada film songs collection',
+      background_image: 'film-songs-bg.jpg'
+    },
+    {
+      category_id: 'podcasts',
+      display_name: 'ಪಾಡ್‌ಕಾಸ್ಟ್‌ಗಳು',
+      description: 'Kannada podcasts and talk shows',
+      background_image: 'podcasts-bg.jpg'
+    },
+    {
+      category_id: 'stories',
+      display_name: 'ಕಥೆಗಳು',
+      description: 'Engaging Kannada stories - horror and thriller',
+      background_image: 'stories-bg.jpg'
+    },
+    {
+      category_id: 'web-series',
+      display_name: 'ವೆಬ್ ಸರಣಿಗಳು',
+      description: 'Kannada web series collection',
+      background_image: 'web-series-bg.jpg'
+    }
+  ];
+
   const playAudio = (audioPath: string, trackTitle?: string) => {
+    // Properly encode URL for special characters like spaces
     const encodedPath = audioPath
       .split('/')
       .map(segment => encodeURIComponent(segment))
       .join('/');
     
     const fullURL = `https://d1jespy3mv91ys.cloudfront.net/${encodedPath}`;
+    
+    console.log('🎵 Original path:', audioPath);
+    console.log('🎵 Encoded path:', encodedPath);
+    console.log('🎵 Full URL:', fullURL);
+    
     setCurrentAudio(fullURL);
     setCurrentTrack(trackTitle || 'Now Playing');
   };

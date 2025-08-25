@@ -23,8 +23,9 @@ const CategoryBrowser: React.FC<CategoryBrowserProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const getSampleAudio = (category: Category) => {
-    switch (category.category_id) {
+  const getSampleAudioForCategory = (categoryId: string): string => {
+    // Return first available audio file path based on your S3 structure
+    switch (categoryId) {
       case 'film-songs':
         return 'film-songs/hit-kannada-songs-vol1/MonsoonRaga/Hombisilina (PenduJatt.Com.Se).mp3';
       case 'podcasts':
@@ -43,7 +44,16 @@ const CategoryBrowser: React.FC<CategoryBrowserProps> = ({
   };
 
   const handleBrowseContent = (category: Category) => {
+    console.log('🔍 Browsing category:', category.category_id);
     navigate(`/category/${category.category_id}`);
+  };
+
+  const handlePlaySample = (category: Category) => {
+    const sampleAudio = getSampleAudioForCategory(category.category_id);
+    if (sampleAudio) {
+      console.log('🎵 Playing sample for:', category.display_name);
+      onPlayAudio(sampleAudio, `${category.display_name} Sample`);
+    }
   };
 
   return (
@@ -74,7 +84,7 @@ const CategoryBrowser: React.FC<CategoryBrowserProps> = ({
                   </button>
                   <button
                     className="play-sample-btn"
-                    onClick={() => onPlayAudio(getSampleAudio(category), `${category.display_name} Sample`)}
+                    onClick={() => handlePlaySample(category)}
                   >
                     🎵 Play Sample
                   </button>
