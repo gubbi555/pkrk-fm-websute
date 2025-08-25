@@ -3,28 +3,27 @@ import './AudioPlayer.css';
 
 interface AudioPlayerProps {
   audioUrl: string;
+  trackTitle: string;
   onClose: () => void;
 }
 
-const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, onClose }) => {
+const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, trackTitle, onClose }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    console.log('🎵 AudioPlayer received URL:', audioUrl);
     if (audioRef.current) {
       audioRef.current.load();
-      // Try to play after user interaction
-      audioRef.current.play().catch(error => {
-        console.log('Autoplay blocked, user must click play:', error);
-      });
     }
   }, [audioUrl]);
 
   return (
-    <div className="audio-player-overlay">
+    <div className="audio-player-fixed">
       <div className="audio-player-container">
         <div className="player-header">
-          <h4>🎵 Now Playing - PKRK FM</h4>
+          <div className="track-info">
+            <h4>🎵 {trackTitle}</h4>
+            <p>PKRK FM - Streaming from CloudFront</p>
+          </div>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
         
@@ -32,19 +31,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, onClose }) => {
           <audio 
             ref={audioRef}
             controls 
+            autoPlay
             style={{ width: '100%' }}
-            crossOrigin="anonymous"
-            preload="metadata"
           >
             <source src={audioUrl} type="audio/mpeg" />
-            Your browser does not support the audio element.
+            Your browser does not support audio playback.
           </audio>
-        </div>
-        
-        <div className="audio-info">
-          <p className="audio-url">🌐 Streaming from CloudFront CDN</p>
-          <p className="audio-source">📍 Mumbai, India Region</p>
-          <p className="audio-debug">URL: {audioUrl}</p>
         </div>
       </div>
     </div>

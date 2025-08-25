@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
 import { withAuthenticator, Button } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import axios from 'axios';
-import AudioPlayer from './components/AudioPlayer';
 import CategoryBrowser from './components/CategoryBrowser';
+import ShowDetails from './components/ShowDetails';
+import AudioPlayer from './components/AudioPlayer';
 import awsconfig from './aws-exports';
 import './App.css';
 
@@ -23,8 +25,8 @@ interface Category {
 function App({ signOut, user }: any) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [currentAudio, setCurrentAudio] = useState<string | null>(null);
+  const [currentTrack, setCurrentTrack] = useState('');
 
   useEffect(() => {
     fetchCategories();
@@ -32,33 +34,26 @@ function App({ signOut, user }: any) {
 
   const fetchCategories = async () => {
     try {
-      console.log('📡 Fetching categories...');
       const response = await axios.get(
         'https://fz7forxwz8.execute-api.ap-south-1.amazonaws.com/prod/categories'
       );
-      console.log('📊 Categories response:', response.data);
       setCategories(response.data);
     } catch (error) {
-      console.error('❌ Error fetching categories:', error);
+      console.error('Error fetching categories:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const playAudio = (audioPath: string) => {
-    // Properly encode URL for special characters like spaces
+  const playAudio = (audioPath: string, trackTitle?: string) => {
     const encodedPath = audioPath
       .split('/')
       .map(segment => encodeURIComponent(segment))
       .join('/');
     
     const fullURL = `https://d1jespy3mv91ys.cloudfront.net/${encodedPath}`;
-    
-    console.log('🎵 Original path:', audioPath);
-    console.log('🎵 Encoded path:', encodedPath);
-    console.log('🎵 Full URL:', fullURL);
-    
     setCurrentAudio(fullURL);
+    setCurrentTrack(trackTitle || 'Now Playing');
   };
 
   return (
@@ -80,20 +75,29 @@ function App({ signOut, user }: any) {
           <p>Loading your Kannada content...</p>
         </div>
       ) : (
-        <>
-          <CategoryBrowser 
-            categories={categories}
-            onCategorySelect={setSelectedCategory}
-            onPlayAudio={playAudio}
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              <CategoryBrowser 
+                categories={categories}
+                onPlayAudio={playAudio}
+              />
+            } 
           />
-          
-          {currentAudio && (
-            <AudioPlayer 
-              audioUrl={currentAudio}
-              onClose={() => setCurrentAudio(null)}
-            />
-          )}
-        </>
+          <Route 
+            path="/category/:categoryId" 
+            element={<ShowDetails onPlayAudio={playAudio} />} 
+          />
+        </Routes>
+      )}
+
+      {currentAudio && (
+        <AudioPlayer 
+          audioUrl={currentAudio}
+          trackTitle={currentTrack}
+          onClose={() => setCurrentAudio(null)}
+        />
       )}
     </div>
   );

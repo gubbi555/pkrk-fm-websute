@@ -1,10 +1,11 @@
-.audio-player-overlay {
+.audio-player-fixed {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(15px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
   z-index: 1000;
   animation: slideUp 0.3s ease;
 }
@@ -28,13 +29,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
-.player-header h4 {
-  margin: 0;
+.track-info h4 {
+  margin: 0 0 5px 0;
   color: white;
   font-size: 1.2em;
+}
+
+.track-info p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9em;
 }
 
 .close-btn {
@@ -56,36 +63,25 @@
 
 .player-controls {
   text-align: center;
-  margin-bottom: 15px;
 }
 
-.audio-element {
-  width: 100%;
-  max-width: 600px;
+.player-controls audio {
   height: 50px;
+  border-radius: 10px;
 }
 
-.audio-info {
-  text-align: center;
-}
-
-.audio-url {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9em;
-  margin: 0;
-}
-
-/* Mobile Responsive */
 @media (max-width: 768px) {
   .audio-player-container {
     padding: 15px;
   }
   
-  .player-header h4 {
-    font-size: 1em;
+  .player-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
   }
   
-  .audio-element {
+  .player-controls audio {
     height: 45px;
   }
 }
