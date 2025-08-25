@@ -1,5 +1,4 @@
 import React, { useRef, useEffect } from 'react';
-import ReactPlayer from 'react-player';
 import './AudioPlayer.css';
 
 interface AudioPlayerProps {
@@ -12,6 +11,13 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, onClose }) => {
 
   useEffect(() => {
     console.log('🎵 AudioPlayer received URL:', audioUrl);
+    if (audioRef.current) {
+      audioRef.current.load();
+      // Try to play after user interaction
+      audioRef.current.play().catch(error => {
+        console.log('Autoplay blocked, user must click play:', error);
+      });
+    }
   }, [audioUrl]);
 
   return (
@@ -23,31 +29,12 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, onClose }) => {
         </div>
         
         <div className="player-controls">
-          {/* ReactPlayer */}
-          <ReactPlayer
-            url={audioUrl}
-            controls
-            playing
-            width="100%"
-            height="60px"
-            onError={(error) => console.error('ReactPlayer error:', error)}
-            onReady={() => console.log('ReactPlayer ready')}
-            config={{
-              file: {
-                attributes: {
-                  controlsList: 'nodownload',
-                  crossOrigin: 'anonymous'
-                }
-              }
-            }}
-          />
-          
-          {/* Fallback HTML5 Audio */}
           <audio 
             ref={audioRef}
             controls 
-            style={{ width: '100%', marginTop: '10px' }}
+            style={{ width: '100%' }}
             crossOrigin="anonymous"
+            preload="metadata"
           >
             <source src={audioUrl} type="audio/mpeg" />
             Your browser does not support the audio element.
